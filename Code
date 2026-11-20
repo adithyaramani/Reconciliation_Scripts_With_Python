@@ -1,0 +1,147 @@
+
+# ============================================================
+# DEBTOR RECONCILIATION TOOL - USER CONFIGURATION
+# ============================================================
+#
+# INSTRUCTIONS FOR USERS:
+#
+# Before running this program, update the settings below
+# according to the two Excel files you want to reconcile.
+#
+# IMPORTANT:
+# 1. Keep both Excel files in the same folder as this Python
+#    program, OR provide their complete file paths.
+# 2. Enter the exact Excel file names, including extensions.
+# 3. Enter the correct worksheet names or sheet numbers.
+# 4. Enter the exact column headings for Debtor Name and
+#    Outstanding Balance in both files.
+# 5. Do not change the reconciliation engine below unless
+#    you understand Python programming.
+#
+# ============================================================
+
+
+# ------------------------------------------------------------
+# A. ENTITY / RECONCILIATION DETAILS
+# ------------------------------------------------------------
+
+# Enter the name of the entity for which reconciliation
+# is being performed.
+
+ENTITY_NAME = "ABC Private Limited"
+
+
+# Enter a description of the reconciliation.
+# Example: March 2026 Debtor Reconciliation
+
+RECONCILIATION_PERIOD = "March 2026"
+
+
+# ------------------------------------------------------------
+# B. INPUT FILE A
+# ------------------------------------------------------------
+
+# Enter the complete Excel file name for the first source.
+# Example: "SAP_Debtors.xlsx"
+
+FILE_A = "Effortless.xlsx"
+
+
+# Enter the worksheet name or sheet number.
+#
+# Examples:
+# SHEET_A = 0
+# SHEET_A = "Debtor Ledger"
+#
+# Use 0 for the first worksheet.
+
+SHEET_A = 0
+
+
+# Enter the EXACT column heading containing debtor/customer
+# names in File A.
+#
+# Example: "Customer Name", "Party Name", "Ledger Name"
+
+NAME_COL_A = "Name"
+
+
+# Enter the EXACT column heading containing debtor balances
+# in File A.
+#
+# Example: "Closing Balance", "Outstanding", "Net Balance"
+
+AMT_COL_A = "Net"
+
+
+# ------------------------------------------------------------
+# C. INPUT FILE B
+# ------------------------------------------------------------
+
+# Enter the complete Excel file name for the second source.
+# Example: "Tally_Debtors.xlsx"
+
+FILE_B = "Tally.xlsx"
+
+
+# Enter the worksheet name or sheet number.
+#
+# Examples:
+# SHEET_B = 0
+# SHEET_B = "Sundry Debtors"
+
+SHEET_B = 0
+
+
+# Enter the EXACT column heading containing debtor/customer
+# names in File B.
+
+NAME_COL_B = "Name"
+
+
+# Enter the EXACT column heading containing debtor balances
+# in File B.
+
+AMT_COL_B = "Balance"
+
+
+# ------------------------------------------------------------
+# D. RECONCILIATION SETTINGS
+# ------------------------------------------------------------
+
+# Tolerance represents the maximum permissible difference
+# between two debtor balances for them to be treated
+# as matched.
+#
+# Examples:
+# 0.00 = Exact match required
+# 0.01 = Difference of 1 paisa/cent permitted
+# 1.00 = Difference of 1 currency unit permitted
+#
+# IMPORTANT:
+# Both source files must use the same currency and
+# comparable balance conventions.
+
+TOLERANCE = 0.01
+
+
+# ------------------------------------------------------------
+# E. OUTPUT REPORT SETTINGS
+# ------------------------------------------------------------
+
+# Enter the name of the final reconciliation workbook.
+# The program will create this file automatically.
+
+OUTPUT_FILE = "Debtor_Reconciliation_Report.xlsx"
+
+
+# Enter the currency symbol used in the report.
+# Examples: "₹", "$", "£", "€"
+
+CURRENCY_SYMBOL = "₹"
+
+
+# ============================================================
+# END OF USER CONFIGURATION
+# DO NOT MODIFY THE RECONCILIATION ENGINE BELOW
+# ============================================================
