@@ -1,0 +1,96 @@
+# Step 1: Install required libraries
+!pip install pandas openpyxl pdfplumber
+
+# Step 2: Import libraries
+import pandas as pd
+import pdfplumber
+from datetime import datetime
+from google.colab import files
+
+# Step 3: Upload Files
+print("Upload Bank Statement (PDF/CSV)")
+bank_upload = files.upload()
+
+print("Upload Ledger File (Excel/CSV)")
+ledger_upload = files.upload()
+
+# Step 4: Read Bank Statement
+def read_bank_statement(file):
+    filename = list(file.keys())[0]
+    if filename.endswith('.csv'):
+        df = pd.read_csv(filename)
+    elif filename.endswith('.pdf'):
+        with pdfplumber.open(filename) as pdf:
+            all_text = []
+            for page in pdf.pages:
+                all_text.extend(page.extract_table() or [])
+            df = pd.DataFrame(all_text[1:], columns=all_text[0])
+    else:
+        raise ValueError("Unsupported file type for bank statement.")
+    return df
+
+# Step 5: Read Ledger File
+def read_ledger(file):
+    filename = list(file.keys())[0]
+    if filename.endswith('.csv'):
+        df = pd.read_csv(filename)
+    elif filename.endswith('.xlsx') or filename.endswith('.xls'):
+        df = pd.read_excel(filename)
+    else:
+        raise ValueError("Unsupported file type for ledger.")
+    return df
+
+# Step 6: Standardize and Clean Data
+def preprocess(df):
+    df.columns = df.columns.str.strip().str.lower()
+    if 'date' in df.columns:
+        df['date'] = pd.to_datetime(df['date'], errors='coerce', dayfirst=True)
+    if 'amount' in df.columns:
+        df['amount'] = pd.to_numeric(df['amount'], errors='coerce')
+    df = df.dropna(subset=['date', 'amount'])
+    return df
+
+# Step 7: Reconciliation Logic
+def reconcile(bank_df, ledger_df):
+    bank_df['matched'] = False
+    ledger_df['matched'] = False
+    matches = []
+
+    for i, bank_row in bank_df.iterrows():
+        match = ledger_df[
+            (abs((ledger_df['date'] - bank_row['date']).dt.days) <= 2) &
+            (ledger_df['amount'] == bank_row['amount']) &
+            (~ledger_df['matched'])
+        ]
+        if not match.empty:
+            ledger_df.loc[match.index[0], 'matched'] = True
+            bank_df.at[i, 'matched'] = True
+            matches.append((i, match.index[0]))
+
+    unmatched_bank = bank_df[~bank_df['matched']]
+    unmatched_ledger = ledger_df[~ledger_df['matched']]
+    return unmatched_bank, unmatched_ledger
+
+# Step 8: Run Everything
+bank_df_raw = read_bank_statement(bank_upload)
+ledger_df_raw = read_ledger(ledger_upload)
+
+bank_df = preprocess(bank_df_raw)
+ledger_df = preprocess(ledger_df_raw)
+
+unmatched_bank, unmatched_ledger = reconcile(bank_df, ledger_df)
+
+# Step 9: Show Results
+print("\n✅ Unmatched Bank Entries:")
+display(unmatched_bank)
+
+print("\n✅ Unmatched Ledger Entries:")
+display(unmatched_ledger)
+
+# Step 10: Download as Excel
+output_filename = "reconciliation_results.xlsx"
+with pd.ExcelWriter(output_filename) as writer:
+    unmatched_bank.to_excel(writer, sheet_name='Unmatched_Bank', index=False)
+    unmatched_ledger.to_excel(writer, sheet_name='Unmatched_Ledger', index=False)
+
+files.download(output_filename)
